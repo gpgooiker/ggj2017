@@ -105,47 +105,55 @@ public class Enemies : MonoBehaviour
 
 		foreach (Wolf w in WolfInSheepsClothes)
 		{
-			GameObject wolf = w.Obj;
-
-			float randomMovementMul = 1.0f;
-			Vector3 target = flockCenter;
-			if(GameState.gameState.horde.Nodes.Count < 10)
+			if (w.Obj != null)
 			{
-				target = GameState.gameState.horde.Nodes[0].transform.position;
-				randomMovementMul = 0;
-            }
+				GameObject wolf = w.Obj;
 
-			float distance = Vector3.Distance(flockCenter, wolf.transform.position);
-
-			float speedMul = Mathf.SmoothStep(8.0f, .6f, Mathf.Clamp(distance, 0f, 12f) / 12.0f);
-
-			Vector3 direction = flockCenter - wolf.transform.position;
-			wolf.transform.position += direction.normalized * Time.deltaTime * 10.0f * speedMul;
-			wolf.transform.localScale = new Vector3(200, 200, 200);
-
-			randomMovement += direction * Random.value * randomMovementMul;
-
-			float colorScale = Mathf.SmoothStep(1.0f, 0.0f, Mathf.Clamp(distance, 0f, 12f) / 12.0f);
-			MeshRenderer meshRenderer = wolf.GetComponent<MeshRenderer>();
-			meshRenderer.material.color = new Color(1, 0.0f, 0.0f, w.MaximumTimer / MaxTimeAlive);
-			
-			wolf.transform.position += randomMovement.normalized * 15f * Time.deltaTime;
-
-			if(distance < 2.0f)
-			{
-				w.Timer += Time.deltaTime;
-				
-				if(w.Timer >= 2.0f || w.MaximumTimer <= 0.0f)
+				float randomMovementMul = 1.0f;
+				float distance = 0f;
+				Vector3 target = flockCenter;
+				if(GameState.gameState.horde.Nodes.Count < 10)
 				{
-					CircleCollider2D collider = wolf.GetComponent<CircleCollider2D>();
-					collider.radius *= 5.0f;
-					wolf.tag = "Wolf";
+					if (GameState.gameState.horde.Nodes.Count > 0) 
+					{
+						target = GameState.gameState.horde.Nodes[0].transform.position;
+						randomMovementMul = 0;
+					}
+				}
 
-					//source.PlayOneShot(ExplosionSound);
-                }
+				distance = Vector3.Distance(flockCenter, wolf.transform.position);
+				float speedMul = Mathf.SmoothStep(8.0f, .6f, Mathf.Clamp(distance, 0f, 12f) / 12.0f);
+
+				Vector3 directionToFlock = flockCenter - wolf.transform.position;
+				Vector3 moveToFlock = directionToFlock.normalized * Time.deltaTime * 10.0f * speedMul;
+				
+				wolf.transform.position += moveToFlock;
+				wolf.transform.localScale = new Vector3(200, 200, 200);
+
+				randomMovement += directionToFlock * Random.value * randomMovementMul;
+
+				float colorScale = Mathf.SmoothStep(1.0f, 0.0f, Mathf.Clamp(distance, 0f, 12f) / 12.0f);
+				MeshRenderer meshRenderer = wolf.GetComponent<MeshRenderer>();
+				meshRenderer.material.color = new Color(1, 0.0f, 0.0f, w.MaximumTimer / MaxTimeAlive);
+				
+				wolf.transform.position += randomMovement.normalized * 15f * Time.deltaTime;
+
+				if(distance < 2.0f)
+				{
+					w.Timer += Time.deltaTime;
+					
+					if(w.Timer >= 2.0f || w.MaximumTimer <= 0.0f)
+					{
+						CircleCollider2D collider = wolf.GetComponent<CircleCollider2D>();
+						collider.radius *= 5.0f;
+						wolf.tag = "Wolf";
+
+						//source.PlayOneShot(ExplosionSound);
+					}
+				}
+
+				w.MaximumTimer -= Time.deltaTime;
 			}
-
-			w.MaximumTimer -= Time.deltaTime;
 		}
 	}
 
